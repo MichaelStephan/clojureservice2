@@ -11,8 +11,8 @@
                     {}
                     data)))
 
-(def default-error-response {:status 500
-                             :headers {"Content-Type" "application/json"}})
+(def default-response {:headers {"Content-Type" "application/json"}})
+(def default-error-response (assoc default-response :status 500))
 
 (defn wrap-exception [resp]
   (condp = resp
@@ -30,9 +30,7 @@
                                                 :?data {:name (get-in req [:params :name])}
                                                 :?reply (fn [resp]
                                                           (http-server/send! channel (wrap-exception resp)))})))
-   (compojure-route/not-found {:status 404
-                               :headers {"Content-Type" "application/json"}
-                               :body (clj->js {:message "not found"})})))
+   (compojure-route/not-found (assoc default-response :body (clj->js {:message "not found"})))))
 
 (defrecord API [cmd-dispatcher]
   component/Lifecycle

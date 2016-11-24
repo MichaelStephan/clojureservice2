@@ -5,9 +5,11 @@
             [health-monitor-clj.webserver :as webserver])
   (:gen-class))
 
+(set! *warn-on-reflection* true)
+
 (defn prod-system []
   (component/system-map
-   :cmd-dispatcher (service/map->CmdDispatcher {:buffer-size 1})
+   :cmd-dispatcher (service/map->CmdDispatcher {:buffer-size 1024})
    :api (component/using
          (api/map->API {})
          [:cmd-dispatcher])

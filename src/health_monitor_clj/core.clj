@@ -7,7 +7,7 @@
 
 (defn prod-system []
   (component/system-map
-   :cmd-dispatcher (service/map->CmdDispatcher {})
+   :cmd-dispatcher (service/map->CmdDispatcher {:buffer-size 1})
    :api (component/using
          (api/map->API {})
          [:cmd-dispatcher])

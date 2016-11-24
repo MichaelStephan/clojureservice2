@@ -30,11 +30,13 @@
   (when ?reply
     (?reply :cmd-dispatcher/no-handler)))
 
-(defrecord CmdDispatcher []
+(defrecord CmdDispatcher [buffer-size]
   component/Lifecycle
   (start [component]
-    (log/infof "Starting Cmd Dispatcher")
-    (let [buffer (a/chan (a/dropping-buffer 512))]
+    (log/infof "Starting Cmd Dispatcher with buffer-size %s" buffer-size)
+    (let [buffer (a/chan (a/buffer (if (> buffer-size 0)
+                                     buffer-size
+                                     512)))]
       (a/go-loop []
         (when-let [{:keys [?reply] :as cmd} (a/<! buffer)]
           (log/infof "Received cmd %s" cmd)

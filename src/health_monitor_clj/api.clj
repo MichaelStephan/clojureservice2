@@ -11,14 +11,15 @@
                     {}
                     data)))
 
+(def default-error-response {:status 500
+                             :headers {"Content-Type" "application/json"}})
+
 (defn wrap-exception [resp]
   (condp = resp
-    :cmd-dispatcher/timeout {:status 500
-                             :headers {"Content-Type" "application/json"}
-                             :body (clj->js {:message "timeout occured"})}
-    :cmd-dispatcher/no-handler {:status 500
-                                :headers {"Content-Type" "application/json"}
-                                :body (clj->js {:message "no handler found"})}
+    :cmd-dispatcher/timeout (merge default-error-response
+                                   :body (clj->js {:message "timeout occured"}))
+    :cmd-dispatcher/no-handler (merge default-error-response
+                                      :body (clj->js {:message "no handler found"}))
     resp))
 
 (defn routes [{:keys [accept] :as cmd-dispatcher}]

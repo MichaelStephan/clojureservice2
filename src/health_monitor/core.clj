@@ -3,7 +3,8 @@
             [health-monitor.cmd :as cmd]
             [health-monitor.service :as service]
             [health-monitor.api :as api]
-            [health-monitor.webserver :as webserver])
+            [health-monitor.webserver :as webserver]
+            [taoensso.timbre :as log])
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -19,10 +20,10 @@
                (webserver/map->WebServer {:port 6667})
                [:api])))
 
-(def system (prod-system))
+(def system (atom (prod-system)))
 
 (defn -main [& args]
-  (alter-var-root #'system component/start))
-
-(comment
-  (alter-var-root #'system component/stop))
+  (.addShutdownHook (Runtime/getRuntime)
+                    (Thread. (fn []
+                               (swap! system component/stop))))
+  (swap! system component/start))

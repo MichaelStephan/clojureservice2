@@ -10,4 +10,4 @@
 (defmethod handle :default [{:keys [?reply cmd]}]
   (log/warnf "No handler for %s found" cmd)
   (when ?reply
-    (?reply :cmd-dispatcher/no-handler)))
+    (?reply [:cmd-dispatcher/no-handler])))

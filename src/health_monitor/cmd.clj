@@ -1,7 +1,8 @@
 (ns health-monitor.cmd
   (:require [com.stuartsierra.component :as component]
             [clojure.core.async :as a]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log])
+  (:use [slingshot.slingshot :only [try+ throw+]]))
 
 (defn accept [buffer-ch]
   (fn [{:keys [?reply timeout] :or {timeout 10000} :as cmd}]
@@ -17,7 +18,7 @@
           (?reply
            (if (= c resp-ch)
              v
-             :cmd-dispatcher/timeout)))))))
+             [:cmd-dispatcher/timeout])))))))
 
 (defrecord CmdDispatcher [handle buffer-size]
   component/Lifecycle
@@ -29,7 +30,11 @@
       (a/go-loop []
         (when-let [{:keys [?reply] :as cmd} (a/<! buffer)]
           (log/infof "Received cmd %s" cmd)
-          (handle cmd)
+          (try+
+           (handle cmd)
+           (catch Object e
+             (log/error "An unforseen exception occured" e)
+             (?reply [:cmd-dispatcher/error e])))
           (recur)))
       (-> component
           (assoc :buffer buffer)

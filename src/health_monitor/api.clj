@@ -1,4 +1,4 @@
-(ns health-monitor-clj.api
+(ns health-monitor.api
   (:require [com.stuartsierra.component :as component]
             [org.httpkit.server :as http-server]
             [taoensso.timbre :as log]
@@ -32,7 +32,7 @@
                                                           (http-server/send! channel (wrap-exception resp)))})))
    (compojure-route/not-found (assoc default-response :body (clj->js {:message "not found"})))))
 
-(defrecord API [cmd-dispatcher]
+(defrecord RestAPI [cmd-dispatcher]
   component/Lifecycle
   (start [component]
     (log/infof "Starting API")

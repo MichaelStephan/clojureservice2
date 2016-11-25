@@ -1,4 +1,4 @@
-(ns health-monitor-clj.service
+(ns health-monitor.cmd
   (:require [com.stuartsierra.component :as component]
             [clojure.core.async :as a]
             [taoensso.timbre :as log]))
@@ -19,18 +19,7 @@
              v
              :cmd-dispatcher/timeout)))))))
 
-(defmulti handle :cmd)
-
-(defmethod handle :cmds/hello [{:keys [?reply ?data]}]
-  (when ?reply
-    (?reply (str "hello " ?data))))
-
-(defmethod handle :default [{:keys [?reply cmd]}]
-  (log/warnf "No handler for %s found" cmd)
-  (when ?reply
-    (?reply :cmd-dispatcher/no-handler)))
-
-(defrecord CmdDispatcher [buffer-size]
+(defrecord CmdDispatcher [handle buffer-size]
   component/Lifecycle
   (start [component]
     (log/infof "Starting Cmd Dispatcher with buffer-size %s" buffer-size)

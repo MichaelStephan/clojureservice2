@@ -1,4 +1,4 @@
-(ns health-monitor-clj.webserver
+(ns health-monitor.webserver
   (:require [com.stuartsierra.component :as component]
             [org.httpkit.server :as http-server]
             [taoensso.timbre :as log]))

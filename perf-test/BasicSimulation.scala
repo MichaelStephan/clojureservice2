@@ -7,7 +7,7 @@ class BasicSimulation extends Simulation {
     .baseURL("http://localhost:6667") 
 
   val scn = scenario("BasicSimulation")
-    .repeat(1000) {
+    .repeat(10000) {
       exec(http("request_1")
       .get("/hello/test"))}
 

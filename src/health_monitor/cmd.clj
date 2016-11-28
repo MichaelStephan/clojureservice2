@@ -12,7 +12,6 @@
                     (when resp
                       (a/>! resp-ch resp))
                     (a/close! resp-ch)))]
-      (println "timeout" :cmd/timeout)
       (a/go
         (a/>! buffer-ch (assoc cmd :cmd/?reply reply))
         (let [[v c] (a/alts! [(a/timeout timeout) resp-ch])]

@@ -20,6 +20,17 @@
              v
              [:cmd-dispatcher/timeout])))))))
 
+(defn process [buffer handle]
+  (a/go-loop []
+    (when-let [{:keys [?reply] :as cmd} (a/<! buffer)]
+      (log/infof "Received cmd %s" cmd)
+      (try+
+       (handle cmd)
+       (catch Object e
+         (log/error "An unforseen exception occured" e)
+         (?reply [:cmd-dispatcher/error e])))
+      (recur))))
+
 (defrecord CmdDispatcher [handle buffer-size]
   component/Lifecycle
   (start [component]
@@ -27,15 +38,7 @@
     (let [buffer (a/chan (a/buffer (if (> buffer-size 0)
                                      buffer-size
                                      512)))]
-      (a/go-loop []
-        (when-let [{:keys [?reply] :as cmd} (a/<! buffer)]
-          (log/infof "Received cmd %s" cmd)
-          (try+
-           (handle cmd)
-           (catch Object e
-             (log/error "An unforseen exception occured" e)
-             (?reply [:cmd-dispatcher/error e])))
-          (recur)))
+      (process buffer handle)
       (-> component
           (assoc :buffer buffer)
           (assoc :accept (accept buffer)))))

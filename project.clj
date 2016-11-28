@@ -6,6 +6,7 @@
   :jvm-opts ["-server" "-Xms512m" "-Xmx512m"]
   :main health-monitor.core
   :dependencies [[org.clojure/clojure "1.8.0"]
+                 [clojure-future-spec "1.9.0-alpha14"]
                  [com.taoensso/timbre "4.7.4"]
                  [http-kit "2.2.0"]
                  [org.clojure/core.async "0.2.395"]

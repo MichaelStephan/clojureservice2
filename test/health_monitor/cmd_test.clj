@@ -1,0 +1,54 @@
+(ns health-monitor.cmd-test
+  (:require [clojure.test :refer :all]
+            [health-monitor.cmd :as cmd]
+            [clojure.core.async :as a]))
+
+(defmacro test-async [ms done-name & body]
+  (let [done-ch (gensym) v (gensym) c (gensym)]
+    `(let [~done-ch (a/chan)
+           ~done-name (fn [] (a/close! ~done-ch))]
+       ~@body
+       (let [[~v ~c] (a/alts!! [(a/timeout ~ms) ~done-ch])]
+         (if (not= ~c ~done-ch)
+           (is (= "Test completed in time" false)))))))
+
+(deftest test-appept
+  (testing "cmd from buffer is processed properly"
+    (test-async 500 done
+                (let [buffer (a/chan (a/buffer 1))]
+                  (cmd/process buffer (fn [cmd]
+                                        (is (= cmd true))
+                                        (a/close! buffer)
+                                        (done)))
+                  (a/put! buffer true))))
+  (testing "cmd's ?reply called with error in case handle function throws exception"
+    (test-async 500 done
+                (let [buffer (a/chan (a/buffer 1))]
+                  (cmd/process buffer (fn [& _]
+                                        (throw (Exception.))))
+                  (a/put! buffer {:?reply (fn [resp]
+                                            (is (= :cmd-dispatcher/error (first resp)))
+                                            (done))})))))
+
+(deftest test-accept
+  (testing "accepted request arrives in buffer"
+    (let [buffer (a/chan (a/buffer 1))
+          accept (cmd/accept buffer)]
+      (accept {:test 123})
+      (is (= 123 (:test (a/<!! buffer))))))
+  (testing "accepted request responded to with timeout if not answered in time"
+    (test-async 500 done
+                (let [buffer (a/chan (a/buffer 1))
+                      accept (cmd/accept buffer)]
+                  (accept {:timeout 100
+                           :?reply (fn [resp]
+                                     (is (= resp [:cmd-dispatcher/timeout]))
+                                     (done))}))))
+  (testing "accepted request responded to with proper response"
+    (test-async 500 done
+                (let [buffer (a/chan (a/buffer 1))
+                      accept (cmd/accept buffer)]
+                  (accept {:?reply (fn [resp]
+                                     (is (= resp true))
+                                     (done))})
+                  ((:?reply (a/<!! buffer)) true)))))

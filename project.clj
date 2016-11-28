@@ -13,4 +13,5 @@
                  [slingshot "0.12.2"]
                  [compojure "1.5.1"]
                  [com.stuartsierra/component "0.3.1"]
-                 [org.clojure/data.json "0.2.6"]])
+                 [org.clojure/data.json "0.2.6"]
+                 [ring-basic-authentication "1.0.5"]])

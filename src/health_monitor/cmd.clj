@@ -13,7 +13,7 @@
 (s/def ::cmd (s/keys :cmd/timeout
                      :cmd/?reply))
 
-(defn accept [buffer-ch]
+(defn make-accept [buffer-ch]
   (fn [{:keys [:cmd/?reply :cmd/timeout] :or {:cmd/timeout 10000} :as cmd}]
     (if (s/valid? ::cmd cmd)
       (let [resp-ch (a/chan)
@@ -55,7 +55,7 @@
       (process buffer handle)
       (-> component
           (assoc :buffer buffer)
-          (assoc :accept (accept buffer)))))
+          (assoc :accept (make-accept buffer)))))
   (stop [{:keys [buffer] :as component}]
     (log/infof "Stopping Cmd Dispatcher")
     (a/close! buffer)

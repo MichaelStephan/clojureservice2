@@ -33,15 +33,15 @@
 (deftest test-accept
   (testing "accepted request arrives in buffer"
     (let [buffer (a/chan (a/buffer 1))
-          accept (cmd/accept buffer)]
+          accept (cmd/make-accept buffer)]
       (is (= (accept {:test 123}) true))
       (is (= 123 (:test (a/<!! buffer))))))
   (testing "invalid request is rejected"
-    (is (= ((cmd/accept nil) {:cmd/timeout -5}) false)))
+    (is (= ((cmd/make-accept nil) {:cmd/timeout -5}) false)))
   (testing "accepted request responded to with timeout if not answered in time"
     (test-async 500 done
                 (let [buffer (a/chan (a/buffer 1))
-                      accept (cmd/accept buffer)]
+                      accept (cmd/make-accept buffer)]
                   (accept {:cmd/timeout 100
                            :cmd/?reply (fn [resp]
                                          (is (= resp [:cmd-dispatcher/timeout]))
@@ -49,7 +49,7 @@
   (testing "accepted request responded to with proper response"
     (test-async 500 done
                 (let [buffer (a/chan (a/buffer 1))
-                      accept (cmd/accept buffer)]
+                      accept (cmd/make-accept buffer)]
                   (accept {:cmd/?reply (fn [resp]
                                          (is (= resp true))
                                          (done))})

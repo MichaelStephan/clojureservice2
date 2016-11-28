@@ -24,7 +24,7 @@
     :cmd-dispatcher/error default-unknown-error-response
     resp))
 
-(defn routes [{:keys [accept] :as cmd-dispatcher}]
+(defn make-routes [{:keys [accept] :as cmd-dispatcher}]
   (compojure/routes
    (compojure/GET "/hello/:name" req (http-server/with-channel req channel
                                        (accept {:cmd/name :cmds/hello
@@ -34,11 +34,11 @@
                                                               (http-server/send! channel (wrap-exception resp)))})))
    (compojure-route/not-found (assoc default-response :body (clj->js {:message "not found"})))))
 
-(defrecord RestAPI [routes cmd-dispatcher]
+(defrecord RestAPI [make-routes cmd-dispatcher]
   component/Lifecycle
   (start [component]
     (log/infof "Starting API")
-    (assoc component :routes (routes cmd-dispatcher)))
+    (assoc component :routes (make-routes cmd-dispatcher)))
   (stop [component]
     (log/infof "Stopping API")
     component))

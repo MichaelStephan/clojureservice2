@@ -13,16 +13,12 @@
 
 (def default-response {:headers {"Content-Type" "application/json"}})
 (def default-error-response (assoc default-response :status 500))
-(def defaut-timeout-response (assoc default-error-response :body (clj->js {:message "timeout occured"})))
-(def default-no-handler-response (assoc default-error-response :body (clj->js {:message "no handler found"})))
-(def default-unknown-error-response (assoc default-error-response :body (clj->js {:message "an unknown error occured"})))
+(def errors {:cmd-dispatcher/timeout (assoc default-error-response :body (clj->js {:message "timeout occured"}))
+             :cmd-dispatcher/no-handler (assoc default-error-response :body (clj->js {:message "no handler found"}))
+             :cmd-dispatcher/error (assoc default-error-response :body (clj->js {:message "an unknown error occured"}))})
 
 (defn wrap-exception [resp]
-  (condp = (first resp)
-    :cmd-dispatcher/timeout defaut-timeout-response
-    :cmd-dispatcher/no-handler default-no-handler-response
-    :cmd-dispatcher/error default-unknown-error-response
-    resp))
+  (get errors (first resp) resp))
 
 (defn make-routes [{:keys [accept] :as cmd-dispatcher}]
   (compojure/routes

@@ -5,15 +5,16 @@
   (:use [slingshot.slingshot :only [try+ throw+]]))
 
 (defn accept [buffer-ch]
-  (fn [{:keys [?reply timeout] :or {timeout 10000} :as cmd}]
+  (fn [{:keys [:cmd/?reply :cmd/timeout] :or {:cmd/timeout 10000} :as cmd}]
     (let [resp-ch (a/chan)
           reply (fn [resp]
                   (a/go
                     (when resp
                       (a/>! resp-ch resp))
                     (a/close! resp-ch)))]
+      (println "timeout" :cmd/timeout)
       (a/go
-        (a/>! buffer-ch (assoc cmd :?reply reply))
+        (a/>! buffer-ch (assoc cmd :cmd/?reply reply))
         (let [[v c] (a/alts! [(a/timeout timeout) resp-ch])]
           (if ?reply
             (?reply
@@ -24,7 +25,7 @@
 
 (defn process [buffer handle]
   (a/go-loop []
-    (when-let [{:keys [?reply] :as cmd} (a/<! buffer)]
+    (when-let [{:keys [:cmd/?reply] :as cmd} (a/<! buffer)]
       (log/infof "Received cmd %s" cmd)
       (try+
        (handle cmd)

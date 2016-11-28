@@ -27,11 +27,11 @@
 (defn routes [{:keys [accept] :as cmd-dispatcher}]
   (compojure/routes
    (compojure/GET "/hello/:name" req (http-server/with-channel req channel
-                                       (accept {:cmd :cmds/hello
-                                                :timeout 5000
-                                                :?data {:name (get-in req [:params :name])}
-                                                :?reply (fn [resp]
-                                                          (http-server/send! channel (wrap-exception resp)))})))
+                                       (accept {:cmd/name :cmds/hello
+                                                :cmd/timeout 5000
+                                                :cmd/?data {:name (get-in req [:params :name])}
+                                                :cmd/?reply (fn [resp]
+                                                              (http-server/send! channel (wrap-exception resp)))})))
    (compojure-route/not-found (assoc default-response :body (clj->js {:message "not found"})))))
 
 (defrecord RestAPI [cmd-dispatcher]

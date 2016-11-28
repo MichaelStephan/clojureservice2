@@ -12,7 +12,7 @@
          (if (not= ~c ~done-ch)
            (is (= "Test completed in time" false)))))))
 
-(deftest test-appept
+(deftest test-process
   (testing "cmd from buffer is processed properly"
     (test-async 500 done
                 (let [buffer (a/chan (a/buffer 1))]
@@ -26,9 +26,9 @@
                 (let [buffer (a/chan (a/buffer 1))]
                   (cmd/process buffer (fn [& _]
                                         (throw (Exception.))))
-                  (a/put! buffer {:?reply (fn [resp]
-                                            (is (= :cmd-dispatcher/error (first resp)))
-                                            (done))})))))
+                  (a/put! buffer {:cmd/?reply (fn [resp]
+                                                (is (= :cmd-dispatcher/error (first resp)))
+                                                (done))})))))
 
 (deftest test-accept
   (testing "accepted request arrives in buffer"
@@ -40,15 +40,15 @@
     (test-async 500 done
                 (let [buffer (a/chan (a/buffer 1))
                       accept (cmd/accept buffer)]
-                  (accept {:timeout 100
-                           :?reply (fn [resp]
-                                     (is (= resp [:cmd-dispatcher/timeout]))
-                                     (done))}))))
+                  (accept {:cmd/timeout 100
+                           :cmd/?reply (fn [resp]
+                                         (is (= resp [:cmd-dispatcher/timeout]))
+                                         (done))}))))
   (testing "accepted request responded to with proper response"
     (test-async 500 done
                 (let [buffer (a/chan (a/buffer 1))
                       accept (cmd/accept buffer)]
-                  (accept {:?reply (fn [resp]
-                                     (is (= resp true))
-                                     (done))})
-                  ((:?reply (a/<!! buffer)) true)))))
+                  (accept {:cmd/?reply (fn [resp]
+                                         (is (= resp true))
+                                         (done))})
+                  ((:cmd/?reply (a/<!! buffer)) true)))))

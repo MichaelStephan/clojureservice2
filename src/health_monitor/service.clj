@@ -3,11 +3,9 @@
 
 (defmulti handle :cmd)
 
-(defmethod handle :cmds/hello [{:keys [?reply ?data]}]
-  (when ?reply
-    (?reply (str "hello " ?data))))
+(defmethod handle :cmds/hello [{:keys [:cmd/?reply :cmd/?data]}]
+  (?reply (str "hello " ?data)))
 
-(defmethod handle :default [{:keys [?reply cmd]}]
-  (log/warnf "No handler for %s found" cmd)
-  (when ?reply
-    (?reply [:cmd-dispatcher/no-handler])))
+(defmethod handle :default [{:keys [:cmd/?reply :cmd/name]}]
+  (log/warnf "No handler for %s found" name)
+  (?reply [:cmd-dispatcher/no-handler]))

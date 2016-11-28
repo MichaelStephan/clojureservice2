@@ -15,10 +15,12 @@
       (a/go
         (a/>! buffer-ch (assoc cmd :?reply reply))
         (let [[v c] (a/alts! [(a/timeout timeout) resp-ch])]
-          (?reply
-           (if (= c resp-ch)
-             v
-             [:cmd-dispatcher/timeout])))))))
+          (if ?reply
+            (?reply
+             (if (= c resp-ch)
+               v
+               [:cmd-dispatcher/timeout]))
+            (log/warnf "No ?reply function registered")))))))
 
 (defn process [buffer handle]
   (a/go-loop []

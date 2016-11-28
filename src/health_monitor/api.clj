@@ -34,7 +34,7 @@
                                                               (http-server/send! channel (wrap-exception resp)))})))
    (compojure-route/not-found (assoc default-response :body (clj->js {:message "not found"})))))
 
-(defrecord RestAPI [cmd-dispatcher]
+(defrecord RestAPI [routes cmd-dispatcher]
   component/Lifecycle
   (start [component]
     (log/infof "Starting API")

@@ -14,7 +14,7 @@
    :cmd-dispatcher (cmd/map->CmdDispatcher {:handle service/handle
                                             :buffer-size 1024})
    :api (component/using
-         (api/map->RestAPI {})
+         (api/map->RestAPI {:routes api/routes})
          [:cmd-dispatcher])
    :webserver (component/using
                (webserver/map->WebServer {:port 6667})

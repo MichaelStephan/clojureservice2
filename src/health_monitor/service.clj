@@ -1,7 +1,7 @@
 (ns health-monitor.service
   (:require [taoensso.timbre :as log]))
 
-(defmulti handle :cmd)
+(defmulti handle :cmd/name)
 
 (defmethod handle :cmds/hello [{:keys [:cmd/?reply :cmd/?data]}]
   (?reply (str "hello " ?data)))

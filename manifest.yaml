@@ -1,0 +1,7 @@
+---
+applications:
+- name: clojureservice 
+  instances: 1
+  memory: 512M
+  env:
+    TEST: test 
